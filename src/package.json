@@ -1,0 +1,20 @@
+{
+  "name": "docassist",
+  "version": "1.0.0",
+  "description": "Alexa skill that will book appointment with doctor",
+  "main": "index.js",
+  "repository": {},
+  "author": "Predhin Tom Sapru",
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^7.0.8",
+    "alexa-sdk": "^1.0.7",
+    "ical": "^0.5.0",
+    "google-auth-library": "^0.10.0",
+    "googleapis": "^20.1.0"
+  },
+  "scripts": {
+    "test": "mocha",
+    "start": "tsc"
+  }
+}

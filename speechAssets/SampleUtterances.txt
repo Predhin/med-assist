@@ -1,0 +1,36 @@
+searchIntent get me stuff happening {date}
+searchIntent get me appointments for {date}
+searchIntent to get me stuff happening {date}
+searchIntent to get me appointments for {date}
+searchIntent whats on {date}
+searchIntent whats happening {date}
+searchIntent tell me whats happening {date}
+searchIntent what is happening {date}
+searchIntent what is happening on {date}
+searchIntent what appointments are happening {date}
+searchIntent what appointments are happening on {date}
+
+searchIntent when is my next appointment
+
+bookDoctorIntent book a new appointment
+bookDoctorIntent book an appointment
+bookDoctorIntent book appointment
+bookDoctorIntent to book a new appointment
+bookDoctorIntent to book an appointment
+bookDoctorIntent to book appointment
+
+numberIntent tell me about appointments {number}
+numberIntent whats appointments {number}
+numberIntent number {number}
+numberIntent {number}
+
+idIntent {id}
+
+bookDoctorDateIntent {date}
+bookDoctorDateIntent for {date}
+bookDoctorDateIntent book it for {date}
+bookDoctorDateIntent book {date}
+
+bookDoctorTimeIntent {time}
+bookDoctorTimeIntent at {time}
+bookDoctorTimeIntent on {time}

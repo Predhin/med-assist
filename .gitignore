@@ -1,0 +1,11 @@
+src/node_modules/
+src/node_modules-with_test
+bower_components/
+npm-debug.log
+dist
+doc
+reports
+typings
+out
+typings
+.idea/
