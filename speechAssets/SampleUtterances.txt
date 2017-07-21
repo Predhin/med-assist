@@ -12,6 +12,9 @@ searchIntent what appointments are happening on {date}
 
 searchIntent when is my next appointment
 
+exitIntent restart
+exitIntent to restart
+
 bookDoctorIntent book a new appointment
 bookDoctorIntent book an appointment
 bookDoctorIntent book appointment

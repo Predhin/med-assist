@@ -7,7 +7,6 @@ var fs = require('fs');
 var readline = require('readline');
 var google = require('googleapis');
 var googleAuth = require('google-auth-library');
-var doctorId = 1000;
 // If modifying these scopes, delete your previously saved credentials
 // at ~/credentials.json
 var SCOPES = ['https://www.googleapis.com/auth/calendar'];
@@ -32,12 +31,18 @@ var NEW_EVENT = {
         'timeZone': 'Asia/Kolkata',
     },
     'recurrence': [],
-    'attendees': [],
+    'attendees': [
+        { 'email': 'YOHAN.JOSEPH@cognizant.com' },
+        { 'email': 'predhin.sapru@cognizant.com' },
+        { 'email': 'Rakesh.Prakash@cognizant.com' }
+    ],
     'reminders': {
         'useDefault': true,
         'overrides': [],
     },
 };
+var salutation_doctor = "Hello Doctor, ";
+var salutation_guest = "Hello Guest, ";
 var states = {
     SEARCHMODE: '_SEARCHMODE',
     DESCRIPTION: '_DESKMODE',
@@ -51,7 +56,7 @@ var ailment = {
 // local variable holding reference to the Alexa SDK object
 var alexa;
 //OPTIONAL: replace with "amzn1.ask.skill.[your-unique-value-here]";
-var APP_ID = undefined;
+var APP_ID = "amzn1.ask.skill.7ca2d4d3-4547-424e-8abf-623a065c384f";
 // URL to get the .ics from, in this instance we are getting from Stanford however this can be changed
 var URL = "https://calendar.google.com/calendar/ical/docassisthackithon%40gmail.com/public/basic.ics";
 // Skills name 
@@ -63,7 +68,7 @@ var HelpMessage = "Here are some things you can say: Is there an appointment tod
 var descriptionStateHelpMessage = "Here are some things you can say: Tell me about event one";
 // Used when there is no data within a time period
 var NoDataMessage = "Sorry there aren't any appointments scheduled. Would you like to search again?";
-var availableDoctors = "We have Doctors for One: Ear, Two: Tooth and Three: Eye. Give me an appropriate number for the ailment you want to book appointment.";
+var availableDoctors = "We have Doctors for One: Ear, Two: Tooth, Three: Eye. Give me an appropriate number for the ailment you want to book appointment.";
 var NoDoctorAvailableForThat = "That doctor is not available. These are the doctors available: " + availableDoctors + "Try asking about another doctor";
 // Used to tell user skill is closing
 var shutdownMessage = "Ok see you again soon.";
@@ -75,9 +80,9 @@ var multipleEventMessage = "There are %d appointments ";
 var scheduledEventMessage = "scheduled for this time frame. I've sent the details to your Alexa app: ";
 var firstThreeMessage = "Here are the first %d. ";
 // the values within the {} are swapped out for variables
-var eventSummary = "The %s appointment is, %s at %s on %s ";
+var eventSummary = "The appointment %s is, %s at %s on %s ";
 // Only used for the card on the companion app
-var cardContentSummary = "%s at %s on %s ";
+var cardContentSummary = "%s. %s at %s on %s ";
 // More info text
 var haveEventsRepromt = "Give me an appointment number to hear more information.";
 // Error if a date is out of range
@@ -96,21 +101,21 @@ var cardContent = "";
 var output = "";
 // doctor info
 var doctors = [{
-        "info": "is an experienced doctor having more than 10 years experience",
+        "info": " is an experienced doctor having more than 10 years experience",
         "skill": "ear specialist",
         "name": "Doctor Ear",
         "type": ailment.EAR,
         "id": [5000]
     },
     {
-        "info": "is an experienced doctor having more than 20 years experience",
+        "info": " is an experienced doctor having more than 20 years experience",
         "skill": "tooth specialist",
         "name": "Doctor Tooth",
         "type": ailment.TOOTH,
         "id": [5001]
     },
     {
-        "info": "is an experienced doctor having more than 30 years experience",
+        "info": " is an experienced doctor having more than 30 years experience",
         "skill": "eye specialist",
         "name": "Doctor Eye",
         "type": ailment.EYE,
@@ -155,6 +160,11 @@ var newSessionHandlers = {
 };
 // create a new handler with a BOOKDOCTOR state
 var startBookDoctorHandlers = Alexa.CreateStateHandler(states.BOOKDOCTOR, {
+    'exitIntent': function () {
+        this.handler.state = "";
+        this.event.session.attributes = {};
+        this.emit(':tell', killSkillMessage);
+    },
     'AMAZON.YesIntent': function () {
         this.handler.state = states.BOOKDOCTOR;
         output = "Ok! tell about the new appointment. " + availableDoctors;
@@ -169,9 +179,10 @@ var startBookDoctorHandlers = Alexa.CreateStateHandler(states.BOOKDOCTOR, {
         if (idSlotValue != undefined) {
             // parse slot value
             var index = parseInt(idSlotValue);
+            var currentLoggedUser = getUserInfo(index);
             this.event.session.attributes.id = index;
             this.handler.state = states.BOOKDOCTOR;
-            output = availableDoctors;
+            output = (currentLoggedUser.isDoctor ? salutation_doctor : salutation_guest) + availableDoctors;
             haveEventsRepromt = output;
             cardTitle = "Book Appointment!";
             cardContent = haveEventsRepromt;
@@ -334,6 +345,7 @@ var startBookDoctorHandlers = Alexa.CreateStateHandler(states.BOOKDOCTOR, {
                         calendar.events.insert({
                             auth: auth,
                             calendarId: calendarId,
+                            sendNotifications: true,
                             resource: NEW_EVENT,
                         }, function (err, event) {
                             if (err) {
@@ -509,21 +521,23 @@ var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
                             }
                             if (relevantEvents[0] != null) {
                                 var date = new Date(relevantEvents[0].start);
-                                output += utils.format(eventSummary, "First", removeTags(relevantEvents[0].summary), relevantEvents[0].location, date.toDateString() + ".");
+                                output += utils.format(eventSummary, "One", removeTags(relevantEvents[0].summary), relevantEvents[0].location, date.toDateString() + ".");
                             }
                             if (relevantEvents[1]) {
                                 var date = new Date(relevantEvents[1].start);
-                                output += utils.format(eventSummary, "Second", removeTags(relevantEvents[1].summary), relevantEvents[1].location, date.toDateString() + ".");
+                                output += utils.format(eventSummary, "Two", removeTags(relevantEvents[1].summary), relevantEvents[1].location, date.toDateString() + ".");
                             }
                             if (relevantEvents[2]) {
                                 var date = new Date(relevantEvents[2].start);
-                                output += utils.format(eventSummary, "Third", removeTags(relevantEvents[2].summary), relevantEvents[2].location, date.toDateString() + ".");
+                                output += utils.format(eventSummary, "Three", removeTags(relevantEvents[2].summary), relevantEvents[2].location, date.toDateString() + ".");
                             }
                             for (var i = 0; i < relevantEvents.length; i++) {
                                 var date = new Date(relevantEvents[i].start);
-                                cardContent += utils.format(cardContentSummary, removeTags(relevantEvents[i].summary), removeTags(relevantEvents[i].location), date.toDateString() + "\n\n");
+                                cardContent += utils.format(cardContentSummary, i + 1, removeTags(relevantEvents[i].summary), removeTags(relevantEvents[i].location), date.toDateString() + "\n\n");
                             }
                             output += eventNumberMoreInfoText;
+                            output = (currentLoggedUser.isDoctor ? salutation_doctor : salutation_guest) + output;
+                            cardContent = (currentLoggedUser.isDoctor ? salutation_doctor : salutation_guest) + cardContent;
                             alexa.emit(':askWithCard', output, haveEventsRepromt, cardTitle, cardContent);
                         }
                         else {
@@ -920,8 +934,8 @@ function convertTime12to24(time12h) {
 var handler = (function () {
     function handler(event, context, callback) {
         alexa = Alexa.handler(event, context);
-        //alexa.APP_ID = APP_ID;
-        alexa.appId = APP_ID;
+        alexa.APP_ID = APP_ID;
+        //alexa.appId = APP_ID;
         alexa.registerHandlers(newSessionHandlers, startSearchHandlers, descriptionHandlers, startBookDoctorHandlers);
         alexa.execute();
     }
