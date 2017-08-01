@@ -179,7 +179,7 @@ var relevantEvents = new Array();
 // Adding session handlers
 var newSessionHandlers = {
     'LaunchRequest': function () {
-        this.handler.state = states.SEARCHMODE;
+        //this.handler.state = states.SEARCHMODE;
         this.emit(':ask', skillName + " " + welcomeMessage, welcomeMessage);
     },
     "searchIntent": function () {
@@ -503,7 +503,7 @@ var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
     'AMAZON.RepeatIntent': function () {
         this.emit(':ask', output, HelpMessage);
     },
-
+    /*
     'bookDoctorIntent': function () {
         var parent = this;
         // change state to description
@@ -515,7 +515,7 @@ var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
 
         //if date do this
         this.emit(':askWithCard', output, haveEventsRepromt, cardTitle, cardContent);
-    },
+    },*/
 
     'searchIntent': function () {
         var parent = this;
