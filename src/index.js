@@ -156,6 +156,19 @@ var newSessionHandlers = {
     'Unhandled': function () {
         this.handler.state = states.SEARCHMODE;
         this.emit(':ask', HelpMessage, HelpMessage);
+    },
+    'SessionEndedRequest': function () {
+        this.emit(':tell', killSkillMessage);
+    },
+    'AMAZON.HelpIntent': function () {
+        output = HelpMessage;
+        this.emit(':ask', output, output);
+    },
+    'AMAZON.StopIntent': function () {
+        this.emit(':tell', killSkillMessage);
+    },
+    'AMAZON.CancelIntent': function () {
+        this.emit(':tell', killSkillMessage);
     }
 };
 // create a new handler with a BOOKDOCTOR state
