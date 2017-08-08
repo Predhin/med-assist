@@ -32,9 +32,7 @@ var NEW_EVENT = {
     },
     'recurrence': [],
     'attendees': [
-        { 'email': 'YOHAN.JOSEPH@cognizant.com' },
         { 'email': 'predhin.sapru@cognizant.com' },
-        { 'email': 'Rakesh.Prakash@cognizant.com' }
     ],
     'reminders': {
         'useDefault': true,
@@ -272,14 +270,21 @@ var startBookDoctorHandlers = Alexa.CreateStateHandler(states.BOOKDOCTOR, {
             var d = new Date();
             currentTime = d.getHours();
             currentTime = currentTime + ":" + d.getMinutes();
-            var currentTimeWrapped = new Date();
+            var currentTimeWrapped = new Date(slotValue);
+            currentTimeWrapped.setTime(new Date().getTime());
+            var indianTimeZoneVal = currentTimeWrapped.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' });
+            currentTimeWrapped = new Date(indianTimeZoneVal);
+            console.log(currentTimeWrapped);
+            console.log("Ref Times:");
             for (var i = 0; i < availableSlots.length; i++) {
                 var refTime = convertTime12to24(availableSlots[i]);
                 var refTimeWrapped = new Date(Date.parse(slotValue + ' ' + refTime));
+                console.log(refTimeWrapped);
                 if (currentTimeWrapped < refTimeWrapped) {
                     availableTime.push(availableSlots[i]);
                 }
             }
+            console.log(availableTime);
             var doctor = { skill: "Physician", type: "general" };
             var doctorIndex = parent.event.session.attributes.doctorIndex;
             var id = parent.event.session.attributes.id;
@@ -341,8 +346,10 @@ var startBookDoctorHandlers = Alexa.CreateStateHandler(states.BOOKDOCTOR, {
                     if (doctorIndex !== undefined && doctors[doctorIndex]) {
                         doctor = doctors[doctorIndex];
                     }
-                    NEW_EVENT.start.dateTime = startTime.toISOString();
-                    NEW_EVENT.end.dateTime = endTime.toISOString();
+                    var startTimeString = startTime.toISOString().split("T")[0] + "T" + prefixZero(startTime.getHours()) + ":" + prefixZero(startTime.getMinutes()) + ":00";
+                    var endTimeString = endTime.toISOString().split("T")[0] + "T" + prefixZero(endTime.getHours()) + ":" + prefixZero(endTime.getMinutes()) + ":00";
+                    NEW_EVENT.start.dateTime = startTimeString;
+                    NEW_EVENT.end.dateTime = endTimeString;
                     output =
                         "Your appointment for " + doctor.skill + " is booked on " + startTime.getDate() +
                             "th of " + monthNames[startTime.getMonth()] +
@@ -915,6 +922,10 @@ function tConvert(time) {
         time[0] = +time[0] % 12 || 12; // Adjust hours
     }
     return time.join(''); // return adjusted time or original string
+}
+function prefixZero(data) {
+    data = "" + data;
+    return data.length < 2 ? "0" + data : data;
 }
 function formatAMPM(date_obj) {
     // formats a javascript Date object into a 12h AM/PM time string
