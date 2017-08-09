@@ -373,8 +373,8 @@ var startBookDoctorHandlers = Alexa.CreateStateHandler(states.BOOKDOCTOR, {
                 output = "Ok, " +
                     "these are the times available on " + eventDate.getDate() +
                     "th of " + monthNames[eventDate.getMonth()] +
-                    ": " + availableTime.join(",") +
-                    ", please tell your convenient time by responding with the time ?"
+                    ": " + availableTime.join(" ") +
+                    " ; please tell your convenient time by responding with the time ?"
 
                 haveEventsRepromt = output;
                 cardTitle = "Appointment Time!";
